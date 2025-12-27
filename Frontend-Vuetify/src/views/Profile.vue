@@ -599,9 +599,9 @@
           reader.onload = async () => {
             // Convert base64 to byte array
             const base64String = reader.result.split(',')[1]; // Remove data:image/jpeg;base64, prefix
-            const byteArray = this.base64ToByteArray(base64String);
+            //const byteArray = this.base64ToByteArray(base64String);
             const requestBody = {
-              profilePicture: byteArray
+              profilePicture: base64String
             };
             await this.updateProfilePicture(requestBody);
           };

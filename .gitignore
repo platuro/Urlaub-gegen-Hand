@@ -150,3 +150,5 @@ Frontend-Vuetify/package.json
 **/.idea/workspace.xml
 **/.idea/tasks.xml
 **/.idea/deploymentTargets.xml
+
+backup.sql
