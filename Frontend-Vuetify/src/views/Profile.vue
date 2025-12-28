@@ -628,16 +628,22 @@
       async fetchUserData() {
         try {
           const response = await axiosInstance.get(`profile/get-user-profile`);
-          this.user = response.data.profile;
-          if (response.data.profile.profilePicture && response.data.profile.profilePicture.length > 0) {
-            // Convert byte array to base64
-            const base64String = btoa(String.fromCharCode(...response.data.profile.profilePicture));
-            this.profileImgSrc = `data:image/jpeg;base64,${base64String}`;
-          } else {
+          const profile = response.data.profile;
+
+          this.user = profile;
+
+          const pic = profile.profilePicture;
+
+          if (!pic || pic.length === 0) {
             this.profileImgSrc = this.defaultProfileImgSrc;
+            return;
           }
+
+          this.profileImgSrc = `data:image/jpeg;base64,${pic}`;
+
         } catch (error) {
           console.error('Fehler beim Abrufen der Benutzerdaten:', error);
+          this.profileImgSrc = this.defaultProfileImgSrc;
           toast.info("Benutzerdaten konnten nicht abgerufen werden.");
         }
       },
