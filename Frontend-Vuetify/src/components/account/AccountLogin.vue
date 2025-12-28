@@ -227,7 +227,7 @@ export default {
         }
         await this.handleLoginSuccess(response.data);
       } catch (error) {
-        console.error('Fehler beim Login:', error);
+        //console.error('Fehler beim Login:', error);
         // Prüfe auf Admin-2FA-Setup-Fehler
         if (error.response && error.response.data && typeof error.response.data === 'object' && error.response.data.Message && error.response.data.Message.includes('Admin accounts must have 2FA enabled')) {
           this.show2FASetup = true;
