@@ -1,23 +1,47 @@
 <template>
-  <div>
+  <div class="impressum">
     <h1>Impressum</h1>
+
     <p>
-      <strong>Holger Jacob</strong><br />
+      <strong>Angaben gemäß § 5 TMG</strong>
+    </p>
+
+    <p>
+      <strong>Daniel Schilling</strong><br />
       Friedrichrodaer Weg 22<br />
-      99894 Friedrichroda<br />
+      99894 Friedrichroda OT Finsterbergen<br />
       Deutschland
     </p>
+
     <p>
-      <strong>Telefon:</strong> +49 36233098761<br />
-      <strong>E-Mail:</strong> info@alreco.de
+      <strong>E-Mail: </strong>
+      <a href="mailto:info@alreco.de">info@alreco.de</a><br />
     </p>
+
     <p>
-      <strong>Rechtsform:</strong> Einzelunternehmen (Kleinunternehmer gemäß § 19 UStG)<br />
-      <strong>Umsatzsteuer-ID:</strong> entfällt wegen Kleinunternehmerregelung
+      <strong>Rechtsform:</strong> Einzelunternehmen<br />
+      <strong>Umsatzsteuer-Identifikationsnummer gemäß §27a UStG:</strong><br />
+      DE354643832
     </p>
+
     <p>
-      <strong>Inhaltlich Verantwortlicher gemäß § 55 Abs. 2 RStV:</strong><br />
-      Holger Jacob (Anschrift wie oben)
+      <strong>Inhaltlich verantwortlich gemäß § 18 Abs. 2 MStV:</strong><br />
+      Daniel Schilling<br />
+      Anschrift wie oben
+    </p>
+
+    <p>
+      <strong>EU-Streitschlichtung</strong><br />
+      Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:<br />
+      <a
+        href="https://ec.europa.eu/consumers/odr"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        https://ec.europa.eu/consumers/odr
+      </a><br />
+      Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren vor einer
+      Verbraucherschlichtungsstelle teilzunehmen.
     </p>
   </div>
 </template>
@@ -29,5 +53,13 @@ export default {
 </script>
 
 <style scoped>
-/* Add your styles here */
+.impressum {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+  line-height: 1.6;
+}
+h1 {
+  margin-bottom: 16px;
+}
 </style>
