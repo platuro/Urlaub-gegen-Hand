@@ -1,5 +1,8 @@
 // Add this script to show errors directly on page
-(function() {
+if (
+  location.hostname === 'localhosts' ||
+  location.hostname === '127.0.0.1s'
+) {(function() {
     // Create error display div
     const errorDiv = document.createElement('div');
     errorDiv.id = 'error-display';
@@ -57,3 +60,4 @@
         document.body.appendChild(errorDiv);
     }
 })();
+}

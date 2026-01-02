@@ -1,5 +1,8 @@
 // Console error catcher for debugging
-(function() {
+if (
+  location.hostname === 'localhosts' ||
+  location.hostname === '127.0.0.1s'
+) {(function() {
     // Override console.error to capture all errors
     const originalError = console.error;
     console.error = function(...args) {
@@ -29,3 +32,4 @@
         console.error('JavaScript Error:', event.error || event.message);
     });
 })();
+}
