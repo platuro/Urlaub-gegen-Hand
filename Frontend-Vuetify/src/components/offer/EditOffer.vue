@@ -27,6 +27,7 @@
                   <!-- Address Selection via Map -->
                   <div class="form-group">
                     <label>Adresse <b style="color: red;">*</b></label>
+                    <small class="d-block mb-2">Es reicht die Angabe von Ort oder Region - keine vollständige Adresse erforderlich.</small>
                     <AddressMapPicker 
                       @address-selected="onAddressSelected"
                       :initial-address="offer.address"
