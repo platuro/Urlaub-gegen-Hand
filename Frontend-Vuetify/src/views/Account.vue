@@ -74,18 +74,16 @@
                 <li class="list-group-item p-3 skills_content">
                   <span class="fw-medium fs-15 d-block mb-3">Skills:</span>
                   <div class="w-75">
-                    <a href="javascript:void(0);">
-                      <span v-for="skills in user.skills" :key="skills" class="badge bg-light text-muted m-1 border">{{
-                        skills }}</span>
+                    <a v-for="skill in user.skills" :key="skill" href="javascript:void(0);">
+                      <span class="badge bg-light text-muted m-1 border">{{ skill.name || skill }}</span>
                     </a>
                   </div>
                 </li>
                 <li class="list-group-item p-3 hobbies_content">
                   <span class="fw-medium fs-15 d-block mb-3">Hobbies:</span>
                   <div class="w-75">
-                    <a href="javascript:void(0);">
-                      <span v-for="hobbies in user.hobbies" :key="hobbies"
-                        class="badge bg-light text-muted m-1 border">{{ hobbies }}</span>
+                    <a v-for="hobbies in user.hobbies" :key="hobbies" href="javascript:void(0);">
+                      <span class="badge bg-light text-muted m-1 border">{{ hobbies }}</span>
                     </a>
                   </div>
                 </li>

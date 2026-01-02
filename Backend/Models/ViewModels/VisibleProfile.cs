@@ -23,7 +23,7 @@ public class VisibleProfile
     public string? FacebookLink { get; set; }
     public double? AverageRating { get; set; }
     public List<string>? Hobbies { get; set; }
-    public List<string>? Skills { get; set; }
+    public List<object>? Skills { get; set; }
     #nullable disable
     // if this flag is true more privileged information can be shared
     public bool contact { get; set; }

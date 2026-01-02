@@ -201,23 +201,24 @@ public class ProfileController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+    
     // get another users profile.
     [HttpGet("get-user-profile/{userId}")]
     public async Task<IActionResult> GetProfile(Guid userId)
     {
         var callerId = _userProvider.UserId;
-         // implement as generell user verification check helper function
-         try {            
-             User caller = await _context.users.FindAsync(callerId);
-             if (caller.VerificationState != UGH_Enums.VerificationState.Verified){
-                 _logger.LogWarning($"Unverified User:{_userProvider.UserId} attempts to access the profile of {userId}");
-                 return StatusCode(403, "forbidden"); 
-             }
-         } catch {
-             _logger.LogError($"Error checking the verification status of {_userProvider.UserId}");
-             return StatusCode(500, new { Message = "Authentication Error"});
-         }
-         try {
+        // implement as generell user verification check helper function
+        try {            
+            User caller = await _context.users.FindAsync(callerId);
+            if (caller.VerificationState != UGH_Enums.VerificationState.Verified){
+                _logger.LogWarning($"Unverified User:{_userProvider.UserId} attempts to access the profile of {userId}");
+                return StatusCode(403, "forbidden"); 
+            }
+        } catch {
+            _logger.LogError($"Error checking the verification status of {_userProvider.UserId}");
+            return StatusCode(500, new { Message = "Authentication Error"});
+        }
+        try {
             User user = await _context.users.Include(u => u.UserMemberships).FirstOrDefaultAsync(u => u.User_Id == userId);
             if (user == null) {
                 throw new Exception("User not found.");
@@ -232,6 +233,28 @@ public class ProfileController : ControllerBase
             
             if (visibleReviews.Count() > 0)
                 userRating = Math.Round(visibleReviews.Average(r => r.RatingValue), 1);
+            
+            // Load skills from skills table if user has skills - SAME LOGIC AS GetUserProfileQueryHandler
+            List<object> userSkills = new List<object>();
+            if (!string.IsNullOrEmpty(user.Skills))
+            {
+                var skillIds = user.Skills.Split(',')
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .Select(s => s.Trim())
+                    .ToList();
+                
+                if (skillIds.Any())
+                {
+                    var skills = await _context.skills
+                        .Where(s => skillIds.Contains(s.Skill_ID.ToString()))
+                        .ToListAsync();
+                    
+                    userSkills = skills.Select(s => new { 
+                        id = s.Skill_ID, 
+                        name = s.SkillDescrition 
+                    }).Cast<object>().ToList();
+                }
+            }
                 
             var profile = new VisibleProfile
             {
@@ -242,7 +265,7 @@ public class ProfileController : ControllerBase
                 Age = (int.Parse(DateTime.Today.ToString("yyyyMMdd")) - int.Parse(user.DateOfBirth.ToString("yyyyMMdd"))) / 10000,
                 Gender = user.Gender,
                 FacebookLink = user.Facebook_link,
-                AverageRating = userRating, // Use the same calculation
+                AverageRating = userRating,
                 MembershipEndDate = user.UserMemberships
                     .Where(m => m.IsMembershipActive)
                     .OrderBy(m => m.CreatedAt)
@@ -250,11 +273,11 @@ public class ProfileController : ControllerBase
                 Latitude = user.Address?.Latitude,
                 Longitude = user.Address?.Longitude,
                 DisplayName = user.Address?.DisplayName,
+                Skills = userSkills  // Use the loaded skills instead of string split
             };
             if (user.Hobbies != null)
                 profile.Hobbies = user.Hobbies.Split(',').Select(h => h.Trim()).ToList() ?? new List<string>();
-            if (user.Skills != null)
-                profile.Skills = user.Skills.Split(',').Select(h => h.Trim()).ToList() ?? new List<string>();
+            
             return Ok(profile);
         }
         catch (Exception ex)
