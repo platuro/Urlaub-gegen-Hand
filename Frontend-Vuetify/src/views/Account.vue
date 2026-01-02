@@ -98,6 +98,12 @@
                     </li>
                   </ul>
                 </li>
+                <!-- Nachricht senden Button -->
+                <li v-if="isLoggedIn && !isOwnProfile && hasActiveMembership" class="list-group-item p-3">
+                  <button class="btn btn-primary w-100" @click="showContactModal = true">
+                    <i class="ri-mail-send-line me-2"></i>Nachricht senden
+                  </button>
+                </li>
               </ul>
             </div>
           </div>
@@ -194,8 +200,17 @@
     </div>
   </div>
 
+  <ContactModal
+    v-if="showContactModal && user.user_Id"
+    v-model:show="showContactModal"
+    :receiver-id="user.user_Id"
+    :receiver-name="user.firstName + ' ' + user.lastName"
+    @sent="onMessageSent"
+  />
+
 </template>
 <script>
+import ContactModal from "@/components/ContactModal.vue";
 import axiosInstance from "@/interceptor/interceptor"
 import Navbar from "@/components/navbar/Navbar.vue";
 import Securitybot from '@/services/SecurityBot';
@@ -203,6 +218,7 @@ import toast from "@/components/toaster/toast";
 import { nextTick } from 'vue';
 export default {
   components: {
+    ContactModal,
     Navbar,
   },
   name: "UserCard",
@@ -220,6 +236,7 @@ export default {
       currentPage: 1,
       totalPages: 1,
       loading: false,
+      showContactModal: false,
     };
   },
   watch: {
@@ -247,6 +264,11 @@ export default {
     }
   },
   methods: {
+    onMessageSent() {
+      this.showContactModal = false;
+      toast.success('Nachricht erfolgreich gesendet!');
+    },
+
     handleScroll(event) {
       const bottom = event.target.scrollHeight === event.target.scrollTop + event.target.clientHeight;
       if (bottom && !this.loading && this.currentPage < this.totalPages) {
@@ -322,6 +344,18 @@ export default {
     imageSrc() {
       return this.profileImgSrc || this.defaultProfileImgSrc;
     },
+    isLoggedIn() {
+      return !!sessionStorage.getItem('token');
+    },
+    isOwnProfile() {
+      const currentUserId = sessionStorage.getItem('currentUserId');
+      return this.user.user_Id === currentUserId;
+    },
+    hasActiveMembership() {
+      const membershipEndDate = sessionStorage.getItem('membershipEndDate');
+      if (!membershipEndDate) return false;
+      return new Date(membershipEndDate) > new Date();
+    }
   }
 };
 </script>

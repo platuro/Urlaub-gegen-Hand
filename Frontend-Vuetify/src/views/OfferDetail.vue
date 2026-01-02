@@ -50,6 +50,12 @@
                </tbody>
               </table>
             <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId :userRole=userRole />
+            <!-- Kontakt aufnehmen Button -->
+            <div v-if="offer.hostId && logId !== offer.hostId" class="mt-3">
+              <button class="btn-primary-ugh" @click="openContactModal">
+                <i class="ri-mail-send-line me-2"></i>Kontakt aufnehmen
+              </button>
+            </div>
             <div class="offer_btn">
               <button @click="backtooffers()" class="btn-arrow-ugh"><i class="ri-arrow-go-back-line" aria-hidden="true"></i></button>
               <span class="ms-2"><span class="text-primary-blue">Zurück</span></span>
@@ -94,6 +100,18 @@
       </div>
     </div>
   </section>
+  
+  <!-- Contact Modal -->
+  <ContactModal
+    v-if="showContactModal && offer"
+    v-model:show="showContactModal"
+    :receiver-id="offer.hostId"
+    :receiver-name="offer.hostName"
+    :receiver-avatar="offer.hostPicture"
+    :offer-id="offer.id"
+    @sent="onMessageSent"
+  />
+  
   <div class="loading" v-else>
     Wird geladen...
   </div>
@@ -103,7 +121,6 @@
 import {
   ref,
   onMounted,
-  computed,
   watch
 } from 'vue';
 import Navbar from '@/components/navbar/Navbar.vue';
@@ -115,8 +132,10 @@ import Apply from '@/components/Apply.vue';
 import getLoggedUserId from '@/services/LoggedInUserId';
 import UserLink from '@/components/offer/UserLink.vue';
 import VueMarkdown from "vue-markdown-render";
+import ContactModal from "@/components/ContactModal.vue";
 import {useRoute} from 'vue-router';
 import { useToast } from 'vue-toastification';
+
 const toast = useToast();
 const {params} = useRoute();
 
@@ -126,10 +145,22 @@ const loading = ref(true);
 const defaultProfileImgSrc = '/defaultprofile.jpg';
 const activeImage = ref(0);
 const openLightbox = ref(false);
+const showContactModal = ref(false);
+
 const redirectToProfile = (userId) => {
   sessionStorage.setItem("UserId", userId);
   router.push("/account");
-}
+};
+
+const openContactModal = () => {
+  console.log('Opening contact modal');
+  showContactModal.value = true;
+};
+
+const onMessageSent = () => {
+  toast.success("Nachricht erfolgreich gesendet!");
+  showContactModal.value = false;
+};
 
 const fetchOfferDetail = async () => {
   try {
@@ -141,6 +172,7 @@ const fetchOfferDetail = async () => {
     loading.value = false;
   }
 };
+
 const formatDate = (dateString) => {
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -149,23 +181,27 @@ const formatDate = (dateString) => {
   };
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
+
 const backtooffers = () => {
   window.history.back();
 };
+
 const closeOffer = async (offer) => {
   try {
     await axiosInstance.put(`/offer/close-offer/${offer.id}`);
     toast.success('Angebot wurde geschlossen.');
-    await fetchOfferDetail(); // Angebot neu laden, damit canReactivate stimmt
+    await fetchOfferDetail();
   } catch (error) {
     toast.error('Fehler beim Schließen des Angebots.');
   }
 };
+
 const modifyOffer = () => {
-      router.push({
-        name: 'ModifyOffer', params: {id: params.id}
-      });
+  router.push({
+    name: 'ModifyOffer', params: {id: params.id}
+  });
 };
+
 const reactivateOffer = async (offerId) => {
   try {
     await axiosInstance.put(`/offer/reactivate/${offerId}`);
@@ -176,7 +212,9 @@ const reactivateOffer = async (offerId) => {
   }
 };
 
-watch(() => offer.value?.images, (imgs) => { if (imgs && imgs.length > 0) activeImage.value = 0; });
+watch(() => offer.value?.images, (imgs) => { 
+  if (imgs && imgs.length > 0) activeImage.value = 0; 
+});
 
 onMounted(fetchOfferDetail);
 </script>
@@ -239,13 +277,10 @@ export default {
 }
 
 .review-item {
-  // padding: 10px;
-  // border: 1px solid #ddd;
   margin-bottom: 10px;
 }
 
 .outline_Greybtn {
-  /* Example button styling */
   border: 1px solid grey;
   background-color: transparent;
   color: grey;

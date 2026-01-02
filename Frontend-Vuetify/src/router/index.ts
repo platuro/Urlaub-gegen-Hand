@@ -149,7 +149,13 @@ const routes: RouteRecordRaw[] = [
     path: '/store',
     name: 'Store',
     component: () => import('@/views/Store.vue'),
-    meta: { roles: ['User'] },
+    meta: { roles: ['User'] }
+  },
+  {
+    path: '/messages',
+    name: 'Messages',
+    meta: { requiresAuth: true },
+    component: () => import('@/views/Messages.vue'),
   },
   {
     path: '/coupons',

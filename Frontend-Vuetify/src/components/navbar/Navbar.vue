@@ -43,6 +43,12 @@
                   </router-link>
                 </li>
                 <li v-if="userRole != 'Admin'" class="nav-item">
+                  <router-link class="nav-link" to="/messages">
+                    <i class="ri-mail-line"></i> Nachrichten
+                    <span v-if="unreadCount > 0" class="badge badge-danger ml-1">{{ unreadCount }}</span>
+                  </router-link>
+                </li>
+                <li v-if="userRole != 'Admin'" class="nav-item">
                   <router-link class="nav-link" to="/offer-request">
                     <i class="ri-mail-line"></i> Anfragen
                   </router-link>
@@ -81,6 +87,7 @@
 </template>
 
 <script lang="ts" setup>
+import axiosInstance from '@/interceptor/interceptor';
 import { ref, onMounted } from 'vue';
 import router from "@/router";
 import {GetUserRole} from "@/services/GetUserPrivileges";
@@ -88,8 +95,20 @@ import {isActiveMembership} from "@/services/GetUserPrivileges";
 const isLoggedIn = ref(false);
 const username = ref(sessionStorage.getItem("firstName"));
 const userRole = ref('');
+const unreadCount = ref(0);
 
 // Handle logout and session clearing
+// Load unread message count
+const loadUnreadCount = async () => {
+  try {
+    const response = await axiosInstance.get('/contact/unread-count');
+    unreadCount.value = response.data.count;
+  } catch (error) {
+    console.error('Fehler beim Laden ungelesener Nachrichten:', error);
+  }
+};
+
+
 const doLogout = () => {
   sessionStorage.clear();
   // Always redirect to login page after logout
@@ -106,6 +125,7 @@ const openPurchaseHistory=()=>{
 
 onMounted(async () => {
   userRole.value = GetUserRole() || '';
+  loadUnreadCount();
   isLoggedIn.value = !!sessionStorage.getItem("token");
 });
 </script>

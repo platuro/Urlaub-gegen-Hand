@@ -32,6 +32,7 @@ namespace UGHApi.DATA
         public DbSet<SuitableAccommodation> accommodationsuitables { get; set; }
 
         public DbSet<Backend.Models.DeletedUserBackup> DeletedUserBackups { get; set; }
+        public DbSet<Message> messages { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

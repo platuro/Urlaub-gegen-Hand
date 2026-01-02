@@ -174,6 +174,11 @@
               <button class="btn-primary-ugh" @click="changePassword">
                 Passwort ändern</button>
             </div>
+            <div class="profile_group_btn" v-if="!isOwnProfile && user.verificationState === 'Verified'">
+              <button class="btn-primary-ugh" @click="showContactModal = true">
+                <i class="ri-mail-send-line me-2"></i>Nachricht senden
+              </button>
+            </div>
             <button class="btn btn-danger" @click="confirmDeleteAccount">
               Lösche Account
             </button>
@@ -311,6 +316,17 @@
     </div>
   </div>
 
+
+  <!-- Contact Modal -->
+  <ContactModal
+    v-if="showContactModal && user.user_Id"
+    v-model:show="showContactModal"
+    :receiver-id="user.user_Id"
+    :receiver-name="user.firstName + ' ' + user.lastName"
+    :receiver-avatar="profileImgSrc"
+    @sent="onMessageSent"
+  />
+
 </template>
 
 <script>
@@ -323,10 +339,12 @@
   import Securitybot from "@/services/SecurityBot";
   import getLoggedUserId from "@/services/LoggedInUserId";
   import toast from "@/components/toaster/toast";
+  import ContactModal from "@/components/ContactModal.vue";
 
   export default {
     components: {
       Navbar,
+      ContactModal,
     },
     name: "UserCard",
     data() {
@@ -354,6 +372,7 @@
         reviews: [],
         currentPage: 1,
         totalPages: 1,
+        showContactModal: false,
       };
     },
     mounted() {
@@ -371,7 +390,17 @@
         }
       },
     },
+    computed: {
+      isOwnProfile() {
+        const currentUserId = this.userId;
+        return this.user.user_Id === currentUserId;
+      },
+    },
     methods: {
+      onMessageSent() {
+        toast.success("Nachricht erfolgreich gesendet!");
+        this.showContactModal = false;
+      },
       async confirmDeleteAccount() {
         const result = await Swal.fire({
           title: 'Ganz sicher?',
