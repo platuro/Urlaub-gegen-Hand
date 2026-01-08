@@ -116,6 +116,7 @@ public class OfferController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
     [HttpGet("get-all-offers")]
     public async Task<IActionResult> GetOffersAsync(
         string searchTerm, 
@@ -305,6 +306,7 @@ public class OfferController : ControllerBase
             offer.Skills = offerViewModel.Skills;
             offer.Requirements = offerViewModel.AccommodationSuitable;
             offer.AdditionalLodgingProperties = offerViewModel.Accommodation;
+            offer.ListingType = (ListingType)offerViewModel.ListingType;
             
             // Create Address entity from geographic location data
             _logger.LogInformation("Creating address with DisplayName: '{DisplayName}', Lat: {Lat}, Lon: {Lon}", 

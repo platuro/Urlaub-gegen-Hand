@@ -39,6 +39,8 @@ public class OfferRepository
         double? longitude = null,
         double? radiusKm = null
     ) {    
+        bool isAuthenticated = userId != Guid.Empty;
+
         IQueryable<OfferTypeLodging> query = _context
             .offertypelodgings.Include(o => o.User)
             .Include(o => o.Address) // Include Address
@@ -83,7 +85,7 @@ public class OfferRepository
         }
 
         // Apply radius search if coordinates are provided
-        if (latitude.HasValue && longitude.HasValue && radiusKm.HasValue && radiusKm.Value > 0)
+        if (isAuthenticated && latitude.HasValue && longitude.HasValue && radiusKm.HasValue && radiusKm.Value > 0)
         {
             // Convert radius from km to degrees (approximate)
             double radiusInDegrees = radiusKm.Value / 111.0; // 1 degree ≈ 111 km
@@ -105,6 +107,10 @@ public class OfferRepository
         
         var offerDTOs = offers
             .Select(o => {
+                if (!isAuthenticated) {
+                    return OfferDTO.CreatePublic(o);
+                }
+
                 var applications = o.OfferApplications ?? new List<OfferApplication>();
                 var firstApplication = applications.FirstOrDefault(oa => oa.UserId == userId);
                 var applicationsExist = applications.Any();
@@ -199,10 +205,11 @@ public class OfferRepository
         }
     }
 
-    public async Task<OfferDTO> GetOfferDetailsByIdAsync(int offerId, Guid userId)
+    public async Task<OfferDTO?> GetOfferDetailsByIdAsync(int offerId, Guid userId)
     {
         var offer = await _context
-            .offertypelodgings.Include(o => o.User)
+            .offertypelodgings
+            .Include(o => o.User)
             .Include(o => o.OfferApplications)
             .Include(o => o.Address)
             .Include(o => o.Pictures)
@@ -210,14 +217,19 @@ public class OfferRepository
 
         if (offer == null)
             return null;
-        bool applicationsExist = (offer.OfferApplications.FirstOrDefault() != null);
-        if (userId != default(Guid)) {
-            var applicationOfRequestingUser = offer.OfferApplications.FirstOrDefault(oa => oa.UserId == userId);
-            return new OfferDTO(offer ,offer.User, applicationOfRequestingUser, applicationsExist);
-        } else
-            return new OfferDTO(offer , null, null, applicationsExist);
-            
+
+        bool isAuthenticated = userId != Guid.Empty;
+        bool applicationsExist = isAuthenticated && (offer.OfferApplications?.Any() == true);
+
+        if (!isAuthenticated)
+            return OfferDTO.CreatePublic(offer);
+
+        var applicationOfRequestingUser = offer.OfferApplications
+            .FirstOrDefault(oa => oa.UserId == userId);
+
+        return new OfferDTO(offer, offer.User, applicationOfRequestingUser, applicationsExist);
     }
+
 
     public async Task<PaginatedList<ReviewOfferDTO>> GetAllOffersForReviewsAsync(
         string searchTerm,

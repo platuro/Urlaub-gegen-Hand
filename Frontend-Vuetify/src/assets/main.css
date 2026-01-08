@@ -1,0 +1,65 @@
+
+/* 1. Buttons für Besucher ausblenden */
+.btn-danger, .btn-primary, button.btn-primary {
+    display: none !important;
+}
+
+/* 2. Den hängenden "Wird geladen"-Text ausblenden */
+p, div {
+    /* Spezieller Filter für den Textinhalt */
+    -webkit-user-select: none;
+}
+
+/* 3. Warnmeldungen/Alerts ausblenden */
+.alert, .alert-warning, .alert-danger {
+    display: none !important;
+}
+
+/* Versteckt die Buttons und den Ladetext auf der Detailseite */
+.btn-danger, 
+button[class*="primary"], 
+p:contains("Wird geladen"),
+div:contains("Wird geladen") {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Versteckt spezifische Warnmeldungen für Besucher */
+.alert-warning, .alert-danger {
+    display: none !important;
+}
+
+/* Versteckt ALLE Buttons und den Ladetext auf der gesamten Seite */
+.v-btn, button, .bg-primary, .bg-danger, p:contains("Wird geladen") {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Versteckt ALLE Buttons und den Ladetext auf der gesamten Seite */
+.v-btn, button, .bg-primary, .bg-danger, p:contains("Wird geladen") {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Versteckt die administrativen Buttons und den Ladetext global */
+.v-btn.bg-danger, 
+.v-btn.bg-primary, 
+.v-btn--variant-elevated.bg-primary,
+button:contains("Angebot"),
+div:contains("Wird geladen") {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Versteckt die administrativen Buttons (rot/blau) und den Ladetext global */
+.v-btn.bg-danger, 
+.v-btn.bg-primary, 
+.v-btn--variant-elevated.bg-primary,
+button:contains("Angebot"),
+div:contains("Wird geladen"),
+p:contains("Wird geladen") {
+    display: none !important;
+    visibility: hidden !important;
+}

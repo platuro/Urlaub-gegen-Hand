@@ -11,22 +11,23 @@ public class OfferDTO
     public string? Accomodationsuitable { get; set; }
     public string Skills { get; set; }
     public Guid? HostId { get; set; }
-    public string HostName { get; set; }
+    public string? HostName { get; set; }
     public double AverageRating { get; set; }
-    public string AppliedStatus { get; set; }
-    public string Region { get; set; }
-    public string Location { get; set; }
+    public string? AppliedStatus { get; set; }
+    public string? Region { get; set; }
+    public string? Location { get; set; }
     public string Description {get; set; }
     public string FromDate { get; set; }
     public string ToDate { get; set; }
     public byte[] HostPicture { get; set; }
     public OfferStatus Status { get; set; }
-    public bool ApplicationsExist { get; set; }
+    public bool? ApplicationsExist { get; set; }
     public bool CanReactivate { get; set; }
     public bool IsExpiringSoon { get; set; }
     public int DaysUntilExpiration { get; set; }
-    public AddressDTO Address { get; set; }
+    public AddressDTO? Address { get; set; }
     public List<object> Images { get; set; }
+    public int ListingType { get; set; }
     public OfferDTO(OfferTypeLodging o, User? u, OfferApplication? oa, bool applicationsExist=false){
         string appliedStatus = oa == null ? "CanApply" : oa.Status switch {
             OfferApplicationStatus.Pending => "Applied",
@@ -52,6 +53,7 @@ public class OfferDTO
             HostPicture = u.ProfilePicture ?? Array.Empty<byte>();
         }
         Status = o.Status;
+        ListingType = (int)o.ListingType;
         Address = o.Address == null ? null : new AddressDTO {
             Latitude = o.Address.Latitude,
             Longitude = o.Address.Longitude,
@@ -74,5 +76,22 @@ public class OfferDTO
         CanReactivate = (o.Status == OfferStatus.Closed && o.ToDate >= today);
         DaysUntilExpiration = (o.ToDate > today) ? o.ToDate.DayNumber - today.DayNumber : 0;
         IsExpiringSoon = (o.Status == OfferStatus.Active && o.ToDate > today && o.ToDate <= today.AddDays(3));
+    }
+
+    public static OfferDTO CreatePublic(OfferTypeLodging o)
+    {
+        var dto = new OfferDTO(o, null, null, applicationsExist: false);
+
+        dto.HostId = null;
+        dto.HostName = null;
+
+        dto.AppliedStatus = null;
+        dto.ApplicationsExist = false;
+
+        dto.Location = null;
+        dto.Region = null;
+        dto.Address = null;
+
+        return dto;
     }
 }

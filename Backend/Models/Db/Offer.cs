@@ -34,6 +34,9 @@ public class Offer {
 
     [Required]
     public OfferStatus Status { get; set; }
+    
+    // Listing Type: Angebot (0) oder Gesuch (1)
+    public ListingType ListingType { get; set; } = ListingType.Angebot;
 
     // Geographic location (NEW) - replacing old Location fields
     public int? AddressId { get; set; }
@@ -77,4 +80,9 @@ public enum OfferStatus {
     Active,    
     Closed, // the offer is not listed for users which aren't the owner. No new applications are possible but the offer can still be rewiewed
     Hidden // the offer is still in the database, but will not be listed anywhere.
+}
+
+public enum ListingType {
+    Angebot = 0,
+    Gesuch = 1
 }

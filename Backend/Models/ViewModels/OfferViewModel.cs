@@ -37,6 +37,9 @@ namespace UGH.Domain.ViewModels
         // Multi-Bild-Unterstützung
         public IFormFile[] Images { get; set; }
         public string[] ExistingImages { get; set; }
+        
+        // Listing Type: 0 = Angebot, 1 = Gesuch
+        public int ListingType { get; set; } = 0;
         // modifications don't need a new image. If an image exists is checked in PutOffer
     }
 }

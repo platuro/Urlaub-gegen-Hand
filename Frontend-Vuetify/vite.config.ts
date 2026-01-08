@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
     server: {
         host: '0.0.0.0',
         port: 3002,
-        allowedHosts: ['localhost'],
+        allowedHosts: true,
         proxy: {
           '/api': {
             target: 'http://backend:8081',
@@ -88,7 +88,7 @@ export default defineConfig(({ mode }) => {
       },
       extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
     },
-    base: '/', // Changed from './' to '/'
+    base: '/', 
     build: {
       assetsDir: 'assets',
       rollupOptions: {

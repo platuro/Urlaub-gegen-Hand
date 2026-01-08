@@ -40,6 +40,12 @@ const routes: RouteRecordRaw[] = [
     meta: { roles: ['User'], membershipStatus: ['Active'], verification: ['ok'] },
   },
   {
+    path: '/add-gesuch',
+    name: 'AddGesuch',
+    component: () => import('@/views/AddGesuch.vue'),
+    meta: { roles: ['User'], membershipStatus: ['Active'], verification: ['ok'] },
+  },
+  {
     path: '/modify-offer/:id',
     name: 'ModifyOffer',
     component: () => import('@/views/ModifyOffer.vue'),

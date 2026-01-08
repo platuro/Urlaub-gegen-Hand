@@ -1,5 +1,6 @@
 <template>
-    <div class="main_header" v-if="isLoggedIn">
+    <!-- GEÄNDERT: Zeige PublicNav nur wenn NICHT eingeloggt -->
+    <div class="main_header" v-if="!isLoggedIn">
         <div class="container">
             <div class="row">
                 <div class="col-sm-12">
@@ -21,7 +22,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <router-link class="nav-link" to="/register">
-                                        <i class="ri-login-box-line"></i> Registrieren
+                                        <i class="ri-user-add-line"></i> Registrieren
                                     </router-link>
                                 </li>
                             </ul>
@@ -38,9 +39,10 @@ import { ref, onMounted } from 'vue';
 
 const isLoggedIn = ref(false);
 
-
 onMounted(async () => {
-    isLoggedIn.value = !sessionStorage.getItem("token");
+    // GEÄNDERT: Entferne das '!' - jetzt korrekt!
+    // isLoggedIn ist TRUE wenn Token vorhanden
+    isLoggedIn.value = !!sessionStorage.getItem("token");
 });
 </script>
 

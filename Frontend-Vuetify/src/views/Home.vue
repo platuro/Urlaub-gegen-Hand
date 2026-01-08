@@ -18,11 +18,6 @@ body .custom-card .button-container .btn {
   font-size: 14px !important;
 }
 
-/*
-  .rating-buttons {
-    margin-bottom: 20px;
-  }
-  */
 .rating-modal-content {
   padding: 0;
   border: none;
@@ -303,6 +298,90 @@ body .custom-card .card-text strong {
     max-width: 100%;
   }
 }
+/* Styles für die neuen Filter-Tabs */
+.listing-type-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.type-tab {
+  padding: 10px 20px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.type-tab:hover {
+  border-color: #bbb;
+  background: #f9f9f9;
+}
+
+.type-tab.active {
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.type-tab.active.all {
+  background-color: #6c757d; 
+}
+
+.type-tab.active.offer {
+  background-color: #0891b2; /* Blau für Angebote */
+}
+
+.type-tab.active.request {
+  background-color: #f97316; /* Orange für Gesuche */
+}
+
+/* Neuer View-Switch (Karte/Liste) */
+.view-switch {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+.view-btn {
+  padding: 8px 16px;
+  border: 1px solid #ced4da;
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+  color: #555;
+}
+.view-btn:first-child {
+  border-radius: 6px 0 0 6px;
+  border-right: none;
+}
+.view-btn:last-child {
+  border-radius: 0 6px 6px 0;
+}
+.view-btn.active {
+  background-color: #e9ecef;
+  color: #333;
+  font-weight: bold;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+@media (max-width: 576px) {
+  .listing-type-tabs {
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 20px;
+  }
+  .type-tab {
+    justify-content: center;
+    width: 100%;
+  }
+}
 </style>
 <template>
   <PublicNav />
@@ -313,10 +392,36 @@ body .custom-card .card-text strong {
       <div class="row">
         <div class="col-sm-12">
           <div class="text-center main_center_title">
-            <h2>Suche nach Angeboten</h2>
-            <p>Du suchst nach deinem Traumurlaubsziel, weißt aber nicht, wo du anfangen sollst? Plane ganz einfach die Reise deines Lebens.</p>
+            <h2>Finde Projekte & Helfer</h2>
+            <p>Ob du Unterstützung suchst oder die Welt entdecken willst: Hier beginnt dein Abenteuer.</p>
           </div>
+          
           <div class="offer_search_content" ref="searchContent">
+            
+            <div class="listing-type-tabs">
+              <button 
+                class="type-tab all" 
+                :class="{ active: listingTypeFilter === 'all' }"
+                @click="setListingType('all')"
+              >
+                <i class="ri-apps-line"></i> Alle anzeigen
+              </button>
+              <button 
+                class="type-tab offer" 
+                :class="{ active: listingTypeFilter === 'offer' }"
+                @click="setListingType('offer')"
+              >
+                <i class="ri-home-heart-line"></i> Nur Angebote
+              </button>
+              <button 
+                class="type-tab request" 
+                :class="{ active: listingTypeFilter === 'request' }"
+                @click="setListingType('request')"
+              >
+                <i class="ri-hand-heart-line"></i> Nur Gesuche
+              </button>
+            </div>
+
             <div class="SearchBox_filter flexBox align-items-center">
               <div class="SearchBox">
                 <i class="ri-search-line"></i>
@@ -329,8 +434,18 @@ body .custom-card .card-text strong {
               </div>
             </div>
             
-            <!-- Sortierung und Umkreissuche -->
-            <div class="filters-container mt-3 mb-3">
+            <div class="d-flex justify-content-between align-items-end mt-3 mb-2 px-1">
+                 <div></div> <div class="view-switch">
+                    <button class="view-btn" :class="{ active: viewMode === 'list' }" @click="viewMode = 'list'">
+                        <i class="ri-list-check"></i> Liste
+                    </button>
+                    <button class="view-btn" :class="{ active: viewMode === 'map' }" @click="viewMode = 'map'">
+                        <i class="ri-map-2-line"></i> Karte
+                    </button>
+                 </div>
+            </div>
+
+            <div class="filters-container mb-3">
               <div class="filter-grid">
                 <div class="filter-col">
                   <label for="sortSelect" class="form-label">Sortierung:</label>
@@ -366,7 +481,6 @@ body .custom-card .card-text strong {
                         @blur="onLocationBlur"
                         autocomplete="off"
                       >
-                      <!-- Autovervollständigung Dropdown -->
                       <div v-if="showSuggestions && locationSuggestions.length > 0" class="suggestions-dropdown">
                         <div 
                           v-for="suggestion in locationSuggestions" 
@@ -383,17 +497,16 @@ body .custom-card .card-text strong {
                       </span>
                     </div>
                     <button @click="openMapPicker" class="btn btn-outline-secondary btn-sm ms-2">
-                      <i class="ri-map-line"></i> Auf Karte auswählen
+                      <i class="ri-map-line"></i> Karte
                     </button>
                     <button v-if="currentLocation" @click="clearLocation" class="btn btn-outline-secondary btn-sm ms-2">
-                      <i class="ri-close-line"></i> Standort löschen
+                      <i class="ri-close-line"></i>
                     </button>
                   </div>
                 </div>
               </div>
             </div>
             
-          <!-- Status Filter -->
           <div class="status-filter mt-3 mb-3 text-center">
             <div class="form-check d-inline-block">
               <input class="form-check-input" type="checkbox" v-model="showInactive" id="showInactiveCheckHome" @change="onCheckboxChange">
@@ -411,27 +524,34 @@ body .custom-card .card-text strong {
     <div class="container">
       <div class="row">
         <div class="col-sm-12">
-          <div v-if="offers && offers.length > 0" class="offers_group">
-            <div v-if="loading" class="spinner-container text-center">
-              <div class="spinner"></div>
-            </div>
-            <div v-else class="row">
-              <div v-for="(offer, index) in offers" :key="offer.id" class="col-md-3 mb-4">
-                <OfferCard :offer=offer :logId=logId :isActiveMember=isActiveMember :userRole=userRole :showStatus=true />
-              </div>
-            </div>
-            <!-- Pagination Section -->
-            <div class="pagination">
-              <button class="btn-arrow-ugh me-2" @click="changePage(currentPage - 1)" :disabled="currentPage === 1"><i
-                  class="ri-arrow-left-s-line"></i></button>
-              <span>Seite {{ currentPage }} von {{ totalPages }}</span>
-              <button class="btn-arrow-ugh ms-2" @click="changePage(currentPage + 1)"
-                :disabled="currentPage === totalPages"><i class="ri-arrow-right-s-line"></i></button>
-            </div>
+          
+          <div v-if="viewMode === 'map'" class="mb-5">
+              <OffersMap :offers="filteredOffers" />
           </div>
-          <div v-else-if="!loading">
-            <h2 class="text-center">Keine Angebote gefunden!</h2>
+
+          <div v-if="viewMode === 'list'" class="offers_group">
+            <div v-if="filteredOffers && filteredOffers.length > 0">
+                <div v-if="loading" class="spinner-container text-center">
+                  <div class="spinner"></div>
+                </div>
+                <div v-else class="row">
+                  <div v-for="(offer, index) in filteredOffers" :key="offer.id" class="col-md-3 mb-4">
+                    <OfferCard :offer=offer :logId=logId :isActiveMember=isActiveMember :userRole=userRole :showStatus=true />
+                  </div>
+                </div>
+                <div class="pagination">
+                  <button class="btn-arrow-ugh me-2" @click="changePage(currentPage - 1)" :disabled="currentPage === 1"><i
+                      class="ri-arrow-left-s-line"></i></button>
+                  <span>Seite {{ currentPage }} von {{ totalPages }}</span>
+                  <button class="btn-arrow-ugh ms-2" @click="changePage(currentPage + 1)"
+                    :disabled="currentPage === totalPages"><i class="ri-arrow-right-s-line"></i></button>
+                </div>
+            </div>
+             <div v-else-if="!loading">
+                <h2 class="text-center">Keine Einträge gefunden!</h2>
+             </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -473,8 +593,7 @@ body .custom-card .card-text strong {
       </div>
     </div>
   </div>
-  
-  <!-- Map Picker Modal -->
+   
   <div v-if="showMapPicker" class="modal-overlay" @click="closeMapPicker">
     <div class="map-picker-modal" @click.stop>
       <div class="modal-header">
@@ -495,6 +614,7 @@ body .custom-card .card-text strong {
 <script setup lang="ts">
 import OfferCard from '@/components/offer/OfferCard.vue';
 import AddressMapPicker from '@/components/common/AddressMapPicker.vue';
+import OffersMap from '@/components/offer/OffersMap.vue'; // NEU
 </script>
 <script lang="ts">
 import Navbar from '@/components/navbar/Navbar.vue';
@@ -552,22 +672,30 @@ export default {
       showSuggestions: false,
       locationSuggestions: [],
       showMapPicker: false,
+      listingTypeFilter: 'all', 
+      viewMode: 'list' // NEU: 'list' oder 'map'
     };
   },
   mounted() {
     this.debouncedSearchOffers = debounce(this.searchOffers, 300);
-    console.log('[DEBUG] Home.vue mounted - userRole:', this.userRole);
-    console.log('[DEBUG] Home.vue mounted - logId:', this.logId);
-    console.log('[DEBUG] Home.vue mounted - isActiveMember:', this.isActiveMember);
-    
-    // Always try to fetch offers, regardless of role
-    console.log('[DEBUG] Home.vue - calling fetchOffers()');
     this.fetchOffers();
   },
   computed: {
-    // Remove client-side filtering since backend handles it
+    filteredOffers() {
+        if (this.listingTypeFilter === 'all') {
+            return this.offers;
+        }
+        const targetType = this.listingTypeFilter === 'offer' ? 0 : 1;
+        return this.offers.filter(offer => offer.listingType === targetType);
+    }
   },
   methods: {
+    setListingType(type) {
+        this.listingTypeFilter = type;
+        this.currentPage = 1;
+        this.fetchOffers();
+    },
+
     resetSearch(search) {
       if (search == '' && this.userRole !== 'Admin') {
         this.fetchOffers();
@@ -584,17 +712,25 @@ export default {
           sortBy: this.sortBy,
           latitude: this.latitude,
           longitude: this.longitude,
-          radiusKm: this.radiusKm
+          radiusKm: this.radiusKm,
+          listingType: this.listingTypeFilter === 'offer' ? 0 : (this.listingTypeFilter === 'request' ? 1 : null)
         };
         const urlParams = new URLSearchParams();
         urlParams.append('searchTerm', params.searchTerm || '');
-        urlParams.append('pageSize', params.pageSize.toString());
+        // WICHTIG: Wenn Karte aktiv ist, wollen wir vielleicht MEHR laden als nur 12.
+        // Aber lassen wir es erstmal bei pageSize, um die Serverlast gering zu halten.
+        urlParams.append('pageSize', this.viewMode === 'map' ? '50' : params.pageSize.toString()); 
         urlParams.append('pageNumber', params.pageNumber.toString());
         urlParams.append('includeInactive', params.includeInactive.toString());
         urlParams.append('sortBy', params.sortBy);
         if (params.latitude) urlParams.append('latitude', params.latitude.toString());
         if (params.longitude) urlParams.append('longitude', params.longitude.toString());
         if (params.radiusKm) urlParams.append('radiusKm', params.radiusKm.toString());
+        
+        if (params.listingType !== null) {
+            urlParams.append('listingType', params.listingType.toString());
+        }
+
         const url = `offer/get-all-offers?${urlParams.toString()}`;
         const response = await axiosInstance.get(url);
         this.offers = response.data.items || response.data.Items || [];
@@ -606,13 +742,18 @@ export default {
         this.loading = false;
       }
     },
+    
+    // Wenn ViewMode geändert wird, laden wir ggf. neu (z.B. für mehr Items auf Karte)
+    watch: {
+        viewMode(newVal) {
+            this.fetchOffers();
+        }
+    },
 
     onFilterChange() {
       this.currentPage = 1;
       this.fetchOffers();
     },
-
-
 
     async onLocationInput() {
       if (this.locationSearch.length < 3) {
@@ -622,25 +763,9 @@ export default {
       }
 
       try {
-        console.log('🔍 Suche Vorschläge für:', this.locationSearch);
         const response = await axiosInstance.get(`geocoding/suggestions?query=${encodeURIComponent(this.locationSearch)}`);
-        console.log('✅ Response erhalten:', response);
-        console.log('✅ Response.data:', response.data);
-        console.log('✅ Response.data type:', typeof response.data);
-        console.log('✅ Response.data length:', response.data ? response.data.length : 'undefined');
-        console.log('📋 Raw response data:', JSON.stringify(response.data, null, 2));
-        
-        // Debug: Zeige alle Properties der Response
-        console.log('📋 Response keys:', Object.keys(response));
-        console.log('📋 Response.data keys:', response.data ? Object.keys(response.data) : 'undefined');
-        
         this.locationSuggestions = response.data || [];
         this.showSuggestions = this.locationSuggestions.length > 0;
-        console.log('📋 Anzahl Vorschläge:', this.locationSuggestions.length);
-        if (this.locationSuggestions.length > 0) {
-          console.log('📋 Erster Vorschlag:', this.locationSuggestions[0]);
-          console.log('📋 Erster Vorschlag keys:', Object.keys(this.locationSuggestions[0]));
-        }
       } catch (error) {
         console.error('❌ Fehler bei der Autovervollständigung:', error);
         this.locationSuggestions = [];
@@ -699,10 +824,8 @@ export default {
 
         this.$nextTick(() => {
           if (!scrollToTargetElement()) {
-            console.log('Starting MutationObserver...');
             const observer = new MutationObserver((mutations, obs) => {
               if (scrollToTargetElement()) {
-                console.log('Element found and scrolled. Disconnecting observer.');
                 obs.disconnect(); 
               }
             });
@@ -715,7 +838,6 @@ export default {
       }
     },
 
-    // Method to send request for offer application
     async sendRequest(offerId) {
       const result = await Swal.fire({
         title: 'Bist du sicher?',
@@ -733,7 +855,6 @@ export default {
         try {
           await axiosInstance.post(`offer/apply-offer?offerId=${offerId}`);
           toast.success("Deine Anfrage wurde gesendet.!");
-          // await this.checkReviewStatus(offerId);
           if (this.userRole !== 'Admin') {
             this.fetchOffers();
           }
@@ -743,7 +864,7 @@ export default {
         }
       }
     },
-    // Method to search offers based on the searchTerm
+
     searchOffers() {
       if (this.userRole !== 'Admin') {
         this.loading = true;
@@ -754,7 +875,7 @@ export default {
       this.currentPage = 1;
       this.fetchOffers();
     },
-                    onCheckboxChange() {
+                  onCheckboxChange() {
                   this.currentPage = 1;
                   this.fetchOffers();
                 },
@@ -764,11 +885,9 @@ export default {
       this.currentOfferId = offerId;
       this.currentIndex = index;
     },
-    // Method to select star rating
     selectStar(rating) {
       this.selectedRating = rating;
     },
-    // // Method to submit rating
     async submitRating() {
       if (this.selectedRating > 0) {
         await this.addRating(this.currentOfferId, this.selectedRating, this.reviewText);
@@ -781,7 +900,6 @@ export default {
       this.showRatingModal = false;
       this.reviewText = '';
     },
-    // Method to add rating for a specific offer
     async addRating(offerId, userRating, reviewText) {
       try {
         const response = await axiosInstance.post(`review/add-review`, {
@@ -977,7 +1095,7 @@ export default {
 }
 
 // .container {
-//   padding: 20px;
+//    padding: 20px;
 // }
 .table {
   width: 100%;

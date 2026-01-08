@@ -1,7 +1,7 @@
-namespace UGHApi.Services.UserProvider
+namespace UGHApi.Services.UserProvider;
+
+public interface IUserProvider
 {
-    public interface IUserProvider
-    {
-        Guid UserId { get; }
-    }
+    Guid UserId { get; }
+    bool IsAuthenticated { get; }
 }

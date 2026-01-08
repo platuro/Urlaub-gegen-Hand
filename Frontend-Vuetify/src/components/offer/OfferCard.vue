@@ -2,6 +2,11 @@
 <div>
   <div @click="redirectToOfferDetail(offer.id)" style="cursor:pointer;">
     <div class="all_items card-offer" :class="{ 'inactive-offer': !isActive }">
+      <!-- Listing Type Badge -->
+      <div class="listing-type-badge">
+        <span v-if="offer.listingType === 1" class="badge badge-gesuch">GESUCH</span>
+        <span v-else class="badge badge-angebot">ANGEBOT</span>
+      </div>
       <!-- Status Badge -->
       <div class="status-badge" v-if="showStatus">
         <span v-if="offer.status === 0" class="badge badge-success">Aktiv</span>
@@ -29,7 +34,10 @@
           <p class="card-text"><strong>Fähigkeiten:</strong> {{ offer.skills }}</p>
           <p class="card-text"><strong>Unterbringung:</strong> {{ offer.accomodation || 'Nicht angegeben' }}</p>
           <p class="card-text"><strong>Geeignet für:</strong> {{ offer.accomodationsuitable || 'Nicht angegeben' }}</p>
-          <p class="card-text"><strong>Region/Ort:</strong> {{ offer.location || 'Nicht angegeben' }}</p>
+          <!-- WICHTIG: Nur für AKTIVE MITGLIEDER (isActiveMember wird von Home.vue übergeben) -->
+          <p class="card-text" v-if="isActiveMember">
+            <strong>Region/Ort:</strong> {{ offer.location || 'Nicht angegeben' }}
+          </p>
         </div>
       </div>
       <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId :userRole=userRole />
@@ -48,7 +56,7 @@ import { computed } from 'vue';
 const props = defineProps({
   offer: Object,
   logId: String,
-  isActiveMember: Boolean,
+  isActiveMember: Boolean,  // WICHTIG: Das prüft ob User BEZAHLT hat!
   userRole: String,
   showStatus: {
     type: Boolean,
@@ -129,5 +137,27 @@ const redirectToOfferDetail = (offerId: String) => {
   font-size: 1rem;
   font-weight: bold;
   z-index: 12;
+}
+.listing-type-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+}
+.badge-angebot {
+  background-color: #0891b2;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+}
+.badge-gesuch {
+  background-color: #f97316;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
 }
 </style>

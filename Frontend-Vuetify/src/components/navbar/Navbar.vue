@@ -13,14 +13,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="navbar-nav ml-auto">
-                <!-- Common Home Link -->
                 <li class="nav-item">
                   <router-link class="nav-link" to="/home">
                     <i class="ri-home-4-line"></i> Startseite <span class="sr-only">(current)</span>
                   </router-link>
                 </li>
                 
-                <!-- Admin-specific Links -->
                 <li v-if="userRole === 'Admin'" class="nav-item">
                   <router-link class="nav-link" to="/admin">
                     <i class="ri-admin-line"></i> Admin
@@ -36,10 +34,9 @@
                     <i class="ri-coupon-line"></i> Coupons
                   </router-link>
                 </li>
-                <!-- Active Membership-specific Links (for users with active membership) -->
                 <li v-if="userRole != 'Admin'" class="nav-item">
                   <router-link class="nav-link" to="/my-offers">
-                    <i class="ri-gift-line"></i> Meine Angebote
+                    <i class="ri-gift-line"></i> Meine Inserate
                   </router-link>
                 </li>
                 <li v-if="userRole != 'Admin'" class="nav-item">
@@ -59,7 +56,6 @@
                   </router-link>
                 </li>
 
-                <!-- User Account and Logout (common for all roles) -->
                 <li class="nav-item dropdown border rounded">
                   <span class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
@@ -97,9 +93,13 @@ const username = ref(sessionStorage.getItem("firstName"));
 const userRole = ref('');
 const unreadCount = ref(0);
 
-// Handle logout and session clearing
-// Load unread message count
+// GEÄNDERT: Lade unread-count NUR wenn Token vorhanden
 const loadUnreadCount = async () => {
+  // Prüfe erst ob Token da ist
+  if (!sessionStorage.getItem("token")) {
+    return; // Kein Token → nicht laden!
+  }
+  
   try {
     const response = await axiosInstance.get('/contact/unread-count');
     unreadCount.value = response.data.count;
@@ -111,10 +111,9 @@ const loadUnreadCount = async () => {
 
 const doLogout = () => {
   sessionStorage.clear();
-  // Always redirect to login page after logout
   router.push({ name: 'Login' });
 };
-// Navigate to profile
+
 const openProfile = () => {
   router.push("/profile");
 };
@@ -124,9 +123,13 @@ const openPurchaseHistory=()=>{
 }
 
 onMounted(async () => {
-  userRole.value = GetUserRole() || '';
-  loadUnreadCount();
   isLoggedIn.value = !!sessionStorage.getItem("token");
+  userRole.value = GetUserRole() || '';
+  
+  // GEÄNDERT: Lade unread-count nur wenn eingeloggt
+  if (isLoggedIn.value) {
+    loadUnreadCount();
+  }
 });
 </script>
 

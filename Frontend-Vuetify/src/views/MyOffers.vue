@@ -5,7 +5,7 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="inner_banner">
-            <h2>Meine Angebote</h2>
+            <h2>Meine Inserate</h2>
           </div>
         </div>
       </div>
@@ -15,27 +15,20 @@
     <div class="container">
       <div class="row">
         <div class="col-sm-12">
-          <div class="sort-new-button ">
-            <div class="sort-select"><label>Sortieren nach</label>
-              <select class="form-control" v-model="sortBy" @change="onSortChange">
-                <option value="newest">Neueste zuerst</option>
-                <option value="oldest">Älteste zuerst</option>
-                <option value="best">Beliebteste zuerst</option>
-              </select>
-            </div>
-            <div class="SearchBox">
-              <i class="ri-search-line text-primary-blue"></i>
-              <input type="text" v-model="searchTerm" @input="debouncedSearch"
-                placeholder="Suche Angebote / Regionen / Skills" class="form-control">
-            </div>
-            <div class="add-new-offer">
-              <router-link class="btn-primary-ugh" to="/add-offer"><i class="ri-add-circle-line"></i> Neues Angebot hinzufügen
+          <div class="sort-new-button">
+            
+            <div class="add-new-offer d-flex flex-wrap gap-2 align-items-center mt-3">
+              <router-link class="btn-primary-ugh" to="/add-offer">
+                <i class="ri-add-circle-line"></i> Neues Angebot einstellen
               </router-link>
-              <button class="btn-deactivate-all ms-2" @click="deactivateAllOffers"><i class="ri-close-circle-line"></i> Alle Angebote deaktivieren</button>
+              
+              <router-link class="btn-gesuch-ugh" to="/add-gesuch">
+                <i class="ri-search-line"></i> Neues Gesuch einstellen
+              </router-link>
             </div>
+
           </div>
-          
-          <!-- Status Filter -->
+           
           <div class="status-filter mt-3 mb-3">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" v-model="showInactive" id="showInactiveCheck" @change="onShowInactiveChange">
@@ -58,26 +51,33 @@
                     <template #actions>
                       <div class="d-flex flex-wrap gap-2 justify-content-center">
                         <button class="btn-primary-ugh btn-sm" @click.stop="shareOnFacebook(offer)">
-                          <i class="ri-facebook-fill"></i> Auf Facebook teilen
+                          <i class="ri-facebook-fill"></i> Teilen
                         </button>
                       </div>
+                      
                       <div class="d-flex flex-wrap gap-2 justify-content-center mt-1">
+                        <button v-if="offer.status === 0"
+                          class="btn btn-outline-danger btn-sm"
+                          @click.stop="deactivateOffer(offer.id)"
+                          title="Angebot vorübergehend deaktivieren"
+                        >
+                          <i class="ri-pause-circle-line"></i> Deaktivieren
+                        </button>
+
                         <button v-if="offer.status === 1"
                           class="btn btn-outline-success btn-sm"
                           @click.stop="reactivateOffer(offer.id)"
                           :disabled="!offer.canReactivate"
-                          :title="!offer.canReactivate ? 'Angebotszeitraum abgelaufen. Reaktivierung nicht möglich.' : 'Angebot reaktivieren'"
+                          :title="!offer.canReactivate ? 'Zeitraum abgelaufen.' : 'Angebot wieder aktivieren'"
                         >
-                          <i class="ri-refresh-line"></i> Reaktivieren
+                          <i class="ri-play-circle-line"></i> Reaktivieren
                         </button>
-                        <!-- Hier können weitere Buttons ergänzt werden -->
                       </div>
                     </template>
                   </OfferCard>
                 </div>
               </div>
             </div>
-             <!-- Pagination Section -->
              <div class="pagination">
               <button class="btn-arrow-ugh me-2" @click="changePage(currentPage - 1)" :disabled="currentPage === 1"><i class="ri-arrow-left-s-line"></i></button>
               <span>Seite {{ Math.max(currentPage, 1) }} von {{ Math.max(totalPages, 1) }}</span>
@@ -85,7 +85,7 @@
             </div>
           </div>
           <div v-else-if="!loading">
-            <h2 class="text-center">Keine Angebote gefunden!</h2>
+            <h2 class="text-center">Keine Inserate gefunden!</h2>
           </div>
         </div>
       </div>
@@ -141,7 +141,7 @@ const fetchOffers = async () => {
     totalPages.value = Math.ceil((response.data.totalCount || response.data.TotalCount || 0) / pageSize.value);
   } catch (error) {
     console.error('Fehler beim Laden der eigenen Angebote:', error);
-    toast.error('Eigene Angebote konnten nicht geladen werden. Bitte versuchen Sie es erneut.');
+    toast.error('Eigene Einträge konnten nicht geladen werden.');
   } finally {
     loading.value = false;
   }
@@ -167,49 +167,44 @@ const debouncedSearch = () => {
   searchTimeout.value = setTimeout(searchOffers, 500);
 };
 
-const onSortChange = () => {
-  loading.value = true;
-  currentPage.value = 1;
-  fetchOffers();
-};
-
 const onShowInactiveChange = () => {
   loading.value = true;
   currentPage.value = 1;
   fetchOffers();
 };
 
+// Einzeln Reaktivieren
 const reactivateOffer = async (offerId: number) => {
   try {
     await axiosInstance.put(`offer/reactivate/${offerId}`);
-    toast.success('Angebot erfolgreich reaktiviert!');
+    toast.success('Inserat wieder aktiviert!');
     fetchOffers();
   } catch (error) {
-    console.error('Fehler beim Reaktivieren des Angebots:', error);
-    toast.error('Angebot konnte nicht reaktiviert werden.');
+    toast.error('Konnte nicht aktiviert werden.');
   }
 };
 
-const deactivateAllOffers = async () => {
+// Einzeln Deaktivieren (mit korrektem Endpunkt)
+const deactivateOffer = async (offerId: number) => {
   const result = await Swal.fire({
-    title: 'Alle Angebote deaktivieren?',
-    text: 'Möchten Sie wirklich alle Ihre aktiven Angebote deaktivieren?',
+    title: 'Inserat pausieren?',
+    text: 'Das Inserat wird ausgeblendet, bleibt aber erhalten.',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#d33',
+    confirmButtonColor: '#f97316',
     cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Ja, alle deaktivieren',
+    confirmButtonText: 'Ja, deaktivieren',
     cancelButtonText: 'Abbrechen'
   });
 
   if (result.isConfirmed) {
     try {
-      await axiosInstance.post('offer/deactivate-all-by-user');
-      toast.success('Alle Angebote wurden deaktiviert!');
+      await axiosInstance.put(`offer/close-offer/${offerId}`);
+      toast.success('Inserat deaktiviert.');
       fetchOffers();
     } catch (error) {
-      console.error('Fehler beim Deaktivieren aller Angebote:', error);
-      toast.error('Angebote konnten nicht deaktiviert werden.');
+      console.error(error);
+      toast.error('Fehler beim Deaktivieren.');
     }
   }
 };
@@ -231,29 +226,28 @@ onMounted(() => {
   margin-top: 30px;
 }
 
-/* Deaktivieren-Button Styling */
-.btn-deactivate-all {
-  background-color: #9ca3af !important; /* Mittel/hellgrau */
-  color: #000000 !important; /* Schwarze Schrift */
-  border: none;
+.btn-gesuch-ugh {
+  background-color: #f97316 !important;
+  color: #ffffff !important;
   padding: 12px 25px;
   border-radius: 8px;
   font-weight: bold;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-gesuch-ugh:hover {
+  background-color: #ea580c !important;
 }
 
-.btn-deactivate-all:hover {
-  background-color: #6b7280 !important; /* Dunkleres Grau beim Hover */
-  color: #000000 !important; /* Schwarze Schrift bleibt */
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+/* Neue Button Styles für Actions */
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
 }
-
-.btn-deactivate-all:focus {
-  background-color: #9ca3af !important;
-  color: #000000 !important;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.3);
+.btn-outline-danger:hover {
+    color: #fff;
+    background-color: #dc3545;
 }
 </style>
